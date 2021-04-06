@@ -1,1 +1,1 @@
-borrower_id,product,amount,installments_number,credit_line_id,date_created,total_amount,loan_id,average_installment_amount
+loan_id,borrower_id,product,amount,installments_number,credit_line_id,date_created,total_amount,average_installment_amount
