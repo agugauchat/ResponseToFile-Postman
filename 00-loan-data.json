@@ -1,0 +1,91 @@
+{
+	"info": {
+		"_postman_id": "3ce72e41-6fd3-4620-9658-3d28d37a9e7a",
+		"name": "00-MLM-audit-loan-data",
+		"description": "This collection makes it easy for users who want to write the response of each request to a file.\nThis can be extended to write anything for eg. meta information or value of variables being used.\n\n\nThis project is using a powerful feature built in postman called as `pm.sendRequest`, the docs for which can be found here: https://www.getpostman.com/docs/v6/postman/scripts/postman_sandbox_api_reference#pmsendrequest\n\n\n## Requirements\nTo work with this script, a local server is required.\nYou can choose to write your own local server or edit the one provided below as per your needs.\n\n## Steps To Use\n1. Put all the requests you want to write the responses for, under this collection.\n \n2. Clone the following repository to your machine - https://github.com/sivcan/ResponseToFile-Postman or use the following command - `git clone https://github.com/sivcan/ResponseToFile-Postman`\n\n3. Navigate into the directory and install the dependencies. Use the following command: `npm i` \n\n4. Run the local server. Use the following command: `node script.js`\n\n5. Now, the responses for every request which is a part of this collection will be written to the `Responses` folder inside the project repo.\nYou can modify the local server's code to change the file location.\n\n5. Run your requests through builder / run through collection runner and store your data locally. \n\n\nYou can modify the script and the local server to support more data formats / data that you want to write to the file.\n\n## Additionally\nInstead of moving each request under this collection, you can copy the script from the `Tests` tab of this collection to the `Tests` tab of any request or even a specific folder.\n\n**Note:** To access the `Tests` script of this collection:\n1. You need to `Right Click` the `Write Responses To File` collection in the sidebar.\n2. Click on `Edit`\n3. Go to `Tests` tab.\n\nThen you can send that particular request / requests under a folder for which the data needs to be written.\n\n## File Extensions\nYou can also modify the **extension** of the file.\n\n**Example:**\nIncase you want to write CSV data to a file, all you need to do is change the `fileExtension` property in the `Tests` script to `csv`.\n\n## File Support\nModify the `opts` variable as per your need under the `Tests` tab of the collection, the following features are supported:\n\n1. If you want all the data to be written to a single file then you can modify the value of `mode` to `appendFile` instead of `writeFile` (More functions here: [Node FS](https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback))\n2. If you want each response to be stored in a different file, then you can provide a uniqueIdentifier such as `Date.now()` or some environment variable as a counter, and it'll be used generate unique file names. You can also make the value of `uniqueIdentifier` as `true` and the server will internally append a unique number to every file name.\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "loan-data",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-caller-scopes",
+						"value": "admin"
+					},
+					{
+						"key": "x-auth-token",
+						"value": "655c51b64ba7582c0784c22a6dd9fda1056aef888c46a633fb4e02bed912cb35",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://internal-api.mercadolibre.com/credits/v2/loans/{{loanId}}",
+					"protocol": "http",
+					"host": [
+						"internal-api",
+						"mercadolibre",
+						"com"
+					],
+					"path": [
+						"credits",
+						"v2",
+						"loans",
+						"{{loanId}}"
+					]
+				},
+				"description": "Search loans based on parameters."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// The opts for the server, also includes the data to be written to file",
+					"let opts = {",
+					"    requestName: request.name || request.url,",
+					"    fileExtension: 'csv',",
+					"    mode: 'appendFile', // Change this to any function of the fs library of node to use it.",
+					"    // loan_id,borrower_id,product,amount,installments_number,credit_line_id,date_created,total_amount,average_installment_amount",
+					"    responseData: pm.response.json().id+\",\"+pm.response.json().borrower_id+\",\"+pm.response.json().product+\",\"+pm.response.json().amount+\",\"+pm.response.json().installments_number+\",\"+pm.response.json().credit_line_id+\",\"+pm.response.json().date_created+\",\"+pm.response.json().total_amount+\",\"+pm.response.json().average_installment_amount+\"\\n\"",
+					"};",
+					"",
+					"pm.sendRequest({",
+					"    url: 'http://localhost:3000/write',",
+					"    method: 'POST',",
+					"    header: 'Content-Type:application/json',",
+					"    body: {",
+					"        mode: 'raw',",
+					"        raw: opts",
+					"    }",
+					"}, function (err, res) {",
+					"    console.log(res);",
+					"});"
+				]
+			}
+		}
+	]
+}

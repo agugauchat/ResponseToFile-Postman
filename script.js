@@ -5,7 +5,7 @@ const express = require('express'),
 
    // Modify the folder path in which responses need to be stored
   folderPath = './Responses/',
-  defaultFileExtension = 'json', // Change the default file extension
+  defaultFileExtension = 'json',
   bodyParser = require('body-parser'),
   DEFAULT_MODE = 'writeFile',
   path = require('path');
@@ -22,23 +22,28 @@ app.get('/', (req, res) => res.send('Hello, I write data to file. Send them requ
 app.post('/write', (req, res) => {
   let extension = req.body.fileExtension || defaultFileExtension,
     fsMode = req.body.mode || DEFAULT_MODE,
-    uniqueIdentifier = req.body.uniqueIdentifier ? typeof req.body.uniqueIdentifier === 'boolean' ? Date.now() : req.body.uniqueIdentifier : false,
-    filename = `${req.body.requestName}${uniqueIdentifier || ''}`,
+    filename = `${req.body.requestName}${req.body.identifier || ''}`,
     filePath = `${path.join(folderPath, filename)}.${extension}`,
     options = req.body.options || undefined;
 
-  fs[fsMode](filePath, req.body.responseData, options, (err) => {
-    if (err) {
-      console.log(err);
-      res.send('Error');
-    }
-    else {
+  if (extension == 'pdf') {
+    fs.writeFile(filePath, req.body.responseData, {encoding: 'base64'}, function(err) {
+      console.log('File created');
       res.send('Success');
-    }
   });
+  } else {
+    fs[fsMode](filePath, req.body.responseData, options, (err) => {
+      if (err) {
+        console.log(err);
+        res.send('Error');
+      }
+      else {
+        res.send('Success');
+      }
+    });
+  }
 });
 
 app.listen(3000, () => {
-  console.log('ResponsesToFile App is listening now! Send them requests my way!');
   console.log(`Data is being stored at location: ${path.join(process.cwd(), folderPath)}`);
 });
